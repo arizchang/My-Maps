@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arizchang.mymaps.models.Place
 import com.arizchang.mymaps.models.UserMap
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import javax.security.auth.login.LoginException
 
 private const val TAG = "MainActivity"
 const val EXTRA_USER_MAP = "EXTRA_USER_MAP"
@@ -18,18 +19,20 @@ private const val REQUEST_CODE = 1234
 class MainActivity : AppCompatActivity() {
     private lateinit var rvMaps: RecyclerView
     private lateinit var fabCreateMap: FloatingActionButton
+    private lateinit var userMaps: MutableList<UserMap>
+    private lateinit var mapAdapter: MapsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         rvMaps = findViewById(R.id.rvMaps)
         fabCreateMap = findViewById(R.id.fabCreateMap)
-        val userMaps = generateSampleData()
+        userMaps = generateSampleData().toMutableList()
 
         // Set layout manager on the recycler view
         rvMaps.layoutManager = LinearLayoutManager(this)
         // Set adapter on the recycler view
-        rvMaps.adapter = MapsAdapter(this, userMaps, object: MapsAdapter.OnClickListener {
+        mapAdapter = MapsAdapter(this, userMaps, object: MapsAdapter.OnClickListener {
             override fun onItemClick(position: Int) {
                 Log.i(TAG, "onItemClick $position")
                 // When user taps on view in RV, nav to new activity
@@ -39,11 +42,12 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+        rvMaps.adapter = mapAdapter
 
         fabCreateMap.setOnClickListener {
             Log.i(TAG, "tap on FAB")
             val intent = Intent(this@MainActivity, CreateMapActivity::class.java)
-            intent.putExtra(EXTRA_MAP_TITLE, "new map name")
+            intent.putExtra(EXTRA_MAP_TITLE, "Create New Map")
             startActivityForResult(intent, REQUEST_CODE)
         }
     }
@@ -51,7 +55,10 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             // Get new map from the data
-
+            val userMap = data?.getSerializableExtra(EXTRA_USER_MAP) as UserMap
+            Log.i(TAG, "onActivityResult with new map title ${userMap.title}")
+            userMaps.add(userMap)
+            mapAdapter.notifyItemInserted(userMaps.size - 1)
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
