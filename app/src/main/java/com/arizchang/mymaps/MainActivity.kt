@@ -37,7 +37,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        userMaps = deserializeUserMaps(this) as MutableList<UserMap>
+        //userMaps = generateSampleData().toMutableList()
+        userMaps = deserializeUserMaps(this).toMutableList()
         rvMaps = findViewById(R.id.rvMaps)
         fabCreateMap = findViewById(R.id.fabCreateMap)
 
@@ -54,12 +55,38 @@ class MainActivity : AppCompatActivity() {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
+            override fun onItemLongClick(position: Int) {
+                Log.i(TAG, "onItemLongClick $position")
+                showDeleteDialog(position)
+            }
+
         })
         rvMaps.adapter = mapAdapter
 
         fabCreateMap.setOnClickListener {
             Log.i(TAG, "tap on FAB")
             showAlertDialog()
+        }
+    }
+    private fun showDeleteDialog(position: Int) {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Delete?")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("OK", null)
+            .show()
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            Log.i(TAG, "showDeleteDialog before remove $position")
+            userMaps.removeAt(position)
+            Log.i(TAG, "showDeleteDialog after remove $position")
+            mapAdapter.notifyItemRemoved(position)
+            mapAdapter.notifyItemRangeChanged(position, userMaps.size)
+            Log.i(TAG, "showDeleteDialog after notifyItemRemoved $position")
+            Log.i(TAG, "size of list ${userMaps.size}")
+            serializeUserMaps(this, userMaps)
+            Toast.makeText(this, "Item Deleted", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+            return@setOnClickListener
         }
     }
 
