@@ -1,5 +1,6 @@
 package com.arizchang.mymaps
 
+import android.R
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,7 +18,7 @@ class MapsAdapter(val context: Context, val userMaps: List<UserMap>, val onClick
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false)
+        val view = LayoutInflater.from(context).inflate(com.arizchang.mymaps.R.layout.item_user_map, parent, false)
         return ViewHolder(view)
     }
 
@@ -28,7 +29,7 @@ class MapsAdapter(val context: Context, val userMaps: List<UserMap>, val onClick
             Log.i(TAG, "Tapped on position $position")
             onClickListener.onItemClick(position)
         }
-        val textViewTitle = holder.itemView.findViewById<TextView>(android.R.id.text1)
+        val textViewTitle = holder.itemView.findViewById<TextView>(com.arizchang.mymaps.R.id.tvMapTitle)
         textViewTitle.text = userMap.title
     }
 
